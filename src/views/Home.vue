@@ -4,7 +4,7 @@
     <div class="main">
       <div class="tryLang">
         <div class="tryLangArea">
-          <textarea v-model="sourceCode" class="tryLangIDE form-control">
+          <textarea @keyup.ctrl.enter="tabulationHandler" autofocus v-model="sourceCode" class="tryLangIDE form-control">
           </textarea>
           <div class="tryLangStdOut">
             <div class="tryLangStdOutArea">
@@ -41,10 +41,19 @@ export default {
     return {
       sourceCode: '',
       stdOut: [],
-      langExtension: 'bytecode'
+      langExtension: 'bytecode',
+      handlers: {
+        print() {
+          alert('printHandler')
+          return 'printHandler'
+        }
+      }
     }
   },
   methods: {
+    tabulationHandler() {
+        this.sourceCode += '    '
+    },
     throwException(exception) {
       alert(`${exception.class}: ${exception.line.code}`)
       this.stdOut.push(`${exception.class}: строка № ${exception.line.index}; #${exception.line.code}`)
@@ -53,24 +62,56 @@ export default {
       this.stdOut = []
       let blocks = 0
       let isClassMustHave = false
-      let isMainFunctionMastHave = false
+      let isMainFunctionMustHave = false
       this.sourceCode.split('\n').map((sourceCodeLine, sourceCodeLineIdx) => {
         let isEndLine = this.sourceCode.split('\n').length - 1 === sourceCodeLineIdx
+        let isPreEndLine = this.sourceCode.split('\n').length - 2 === sourceCodeLineIdx
         if (sourceCodeLine.match(/^class .* \{$/) && !isClassMustHave) {
           blocks++
           isClassMustHave = true
           this.stdOut.push(`${sourceCodeLineIdx + 1}) Запускаю ${sourceCodeLine.replace(/class /, '').replace(/ \{/, '')}.${this.langExtension}`)
+
+          if (isEndLine && !isMainFunctionMustHave) {
+            let exception = {
+              class: 'MainFunctionNotFoundException',
+              line: {
+                code: sourceCodeLine,
+                index: sourceCodeLineIdx
+              }
+            }
+            this.throwException(exception)
+          } else if (this.sourceCode.split('').filter(leteral => leteral === '}').length !== this.sourceCode.split('').filter(leteral => leteral === '{').length) {
+            // blocks !== 0 && !isMainFunctionMustHave && !isPreEndLine && isClassMustHave
+            let exception = {
+              class: 'MainFunctionNotFoundException',
+              line: {
+                code: sourceCodeLine,
+                index: sourceCodeLineIdx
+              }
+            }
+            this.throwException(exception)
+          }
+
         } else if (blocks >= 1 && isClassMustHave) {
-          let isExpression = sourceCodeLine.match(/^.*print\(\'.*\'\).*$/)
+          let isExpression = sourceCodeLine.match(/^.*\(.*\).*$/)
           if (sourceCodeLine.match(/^.*\{.*$/)) {
             blocks++
             if (sourceCodeLine.match(/^.*void main.*\(.*\).*\{.*$/)) {
-              isMainFunctionMastHave = true
+              isMainFunctionMustHave = true
             }
           } else if (sourceCodeLine.match(/^.*\}.*$/)) {
             blocks--
-            if (isMainFunctionMastHave) {
-              isMainFunctionMastHave = false
+            if (isMainFunctionMustHave) {
+              isMainFunctionMustHave = false
+            } else if (!isMainFunctionMustHave) {
+              let exception = {
+                class: 'MainFunctionNotFoundException',
+                line: {
+                  code: sourceCodeLine,
+                  index: sourceCodeLineIdx
+                }
+              }
+              // this.throwException(exception)
             }
           } else if (!isExpression) {
             let exception = {
@@ -81,9 +122,55 @@ export default {
               }
             }
             this.throwException(exception)
-          } else if (isExpression && isMainFunctionMastHave) {
+          } else if (isExpression && isMainFunctionMustHave) {
             // выполнить команду
-            this.stdOut.push(`${sourceCodeLineIdx + 1}) ${sourceCodeLine.replace(/print\(\'/, '').replace(/\'.*\).*/, '')}`)
+            let exitCode = sourceCodeLine.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
+            let methodName = sourceCodeLine.replace(/\(.*\)/, '').replaceAll(' ', '')
+            let methodParams = sourceCodeLine.replace(/.*\(/, '').replace(/\)/, '').replaceAll(' ', '').split(',')
+            if (methodName === 'print') {
+              exitCode = sourceCodeLine.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
+            } else {
+              // собственные функции
+              let sourceStartStringIndex = this.sourceCode.split('\n').findIndex(source => source.includes(`void ${methodName}`))
+              if (sourceStartStringIndex !== -1 ) {
+                let sourceEndStringIndex = this.sourceCode.split('\n').findIndex((source, sourceIdx) => sourceIdx >= sourceStartStringIndex && source.includes(`\}`))
+                if (sourceEndStringIndex !== -1 ) {
+                  this.sourceCode.split('\n').filter((sourceCodeLine, sourceCodeLineIdx) => sourceCodeLineIdx > sourceStartStringIndex && sourceCodeLineIdx < sourceEndStringIndex).map(source => {
+                    let isExpression = source.match(/^.*\(.*\).*$/)
+                    if (isExpression) {
+                      alert(`methodParams: ${methodParams}`)
+                      exitCode = source.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
+                      let methodName = source.replace(/\(.*\)/, '').replaceAll(' ', '')
+                      if (methodName === 'print') {
+                        exitCode = source.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
+                        // alert(source.replace(/.*\(/, '').replace(/\).*/, ''))
+                        // let methodParams = sourceCodeLine.replace(/.*\(/, '').replace(/\)/, '').replaceAll(' ', '').split(',')
+                      }
+                      // this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
+                    }
+                  })
+                }
+              } else {
+                let exception = {
+                  class: 'FunctionNotFoundException',
+                  line: {
+                    code: sourceCodeLine,
+                    index: sourceCodeLineIdx
+                  }
+                }
+                this.throwException(exception)
+                return
+              }
+              // alert(`sourceStartString: ${sourceStartString}`)
+            }
+            // if (!Number(sourceCodeLine.replace(/.*\(\'/, '').replace(/\'.*\).*/, ''))) {
+            //   exitCode = sourceCodeLine.replace(/\(\'/, '').replace(/\'.*\).*/, '')
+            // } else if (!!Number(sourceCodeLine.replace(/.*\(/, '').replace(/.*\).*/, ''))) {
+            //   exitCode = sourceCodeLine.replace(/\(/, '').replace(/.*\).*/, '')
+            // }
+            
+            // this.handlers[methodName]()
+            this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
           }
         } else {
           if (blocks === 0 && isClassMustHave) {
@@ -108,7 +195,7 @@ export default {
         }
         
       })
-      
+
     }
   },
   components: {
@@ -123,12 +210,15 @@ export default {
     display: flex;
     justify-content: center;
     height: 350px;
+    
   }
 
   .tryLangArea {
     width: 75%;
     display: flex;
     justify-content: center;
+    border: 1px solid rgb(175, 175, 175);
+    border-radius: 8px;
   }
 
   .tryLangIDE {
@@ -137,6 +227,7 @@ export default {
     width: 65%;
     background-color: rgb(75, 75, 75);
     color: rgb(255, 255, 255);
+    border-radius: 8px;
   }
 
   .tryLangStdOut {
@@ -146,6 +237,7 @@ export default {
     background-color: rgb(245, 245, 245);
     display: flex;
     flex-direction: column;
+    border-radius: 8px;
   }
 
   .tryLangStdOutArea {
