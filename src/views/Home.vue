@@ -2,6 +2,11 @@
   <div>
     <Header />
     <div class="main">
+      <div class="tryLangHeader">
+        <span class="tryLangHeaderLabel">
+          Try lang
+        </span>
+      </div>
       <div class="tryLang">
         <div class="tryLangArea">
           <textarea @keyup.ctrl.enter="tabulationHandler" autofocus v-model="sourceCode" class="tryLangIDE form-control">
@@ -256,6 +261,18 @@ export default {
 
   .tryLangStdOutProgramControl {
     width: 100px;
+  }
+
+  .tryLangHeader {
+    display: flex;
+    justify-content: center;
+    height: 50px;
+    margin: 25px 0px;
+  }
+
+  .tryLangHeaderLabel {
+    font-size: 32px;
+    font-weight: 600;
   }
 
 </style>
