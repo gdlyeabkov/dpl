@@ -2,6 +2,102 @@
   <div>
     <Header />
     <div class="main">
+      <div class="aboutLang">
+        <div class="aboutLangItem">
+          <span class="aboutLangItemHeader">
+            Build fast, reliable, and efficient software at<br />scale
+          </span>
+          <div class="benefits">
+            <div class="benefit">
+              <span class="benefitItem material-icons">
+                done
+              </span>
+              <span class="benefitItem">
+                Go is an open source programming language supported by Google
+              </span>
+            </div>
+            <div class="benefit">
+              <span class="benefitItem material-icons">
+                done
+              </span>
+              <span class="benefitItem">
+                Easy to learn and get started with
+              </span>
+            </div>
+            <div class="benefit">
+              <span class="benefitItem material-icons">
+                done
+              </span>
+              <span class="benefitItem">
+                Built-in concurrency and a robust standard library
+              </span>
+            </div>
+            <div class="benefit">
+              <span class="benefitItem material-icons">
+                done
+              </span>
+              <span class="benefitItem">
+                Growing ecosystem of partners, communities, and tools
+              </span>
+            </div>
+          </div>
+          <div class="btnsContainer">
+            <button class="btnsContainerItem btn btn-warning">
+              Get Started
+            </button>
+            <button class="btnsContainerTransparentItem btnsContainerItem btn btn-light">
+              Download
+            </button>
+          </div>
+          <span class="aboutLangItemContent">
+            Download packages for Windows 64-bit, macOS, Linux, and more
+          </span>
+          <span class="aboutLangItemContent">
+            The go command by default downloads and authenticates modules using the Go module mirror and Go checksum database run by Google. Learn more.
+          </span>
+        </div>
+        <img src="https://go.dev/images/gophers/ladder.svg" alt="" width="180px" class="langLogo" />
+      </div>
+      <div class="companiesUsingLang">
+        <span class="companiesUsingLangHeader">
+          Companies using Lang
+        </span>
+        <span class="companiesUsingLangDesc">
+          Organizations in every industry use Go to power their software and services View all stories
+        </span>
+        <div class="companies">
+          <div class="companiesColumn">
+            <img class="company" src="https://go.dev/images/logos/google.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/dropbox.png" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/riotgames.png" alt="" width="150px" />
+          </div>
+          <div class="companiesColumn">
+            <img class="company" src="https://go.dev/images/logos/paypal.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/cloudflare.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/salesforce.svg" alt="" width="150px" />
+          </div>
+          <div class="companiesColumn">
+            <img class="company" src="https://go.dev/images/logos/american-express.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/facebook.png" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/target.svg" alt="" width="150px" />
+          </div>
+          <div class="companiesColumn">
+            <img class="company" src="https://go.dev/images/logos/mercado-libre.png" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/microsoft.png" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/twitch.svg" alt="" width="150px" />
+          </div>
+          <div class="companiesColumn">
+            <img class="company" src="https://go.dev/images/logos/capital-one.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/wildlife.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/twitter.svg" alt="" width="150px" />
+          </div>
+          <div class="companiesColumn">
+            <img class="company" src="https://go.dev/images/logos/cockroach.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/netflix.svg" alt="" width="150px" />
+            <img class="company" src="https://go.dev/images/logos/uber.svg" alt="" width="150px" />
+          </div>
+        </div>
+      </div>
       <div class="tryLangHeader">
         <span class="tryLangHeaderLabel">
           Try lang
@@ -319,6 +415,99 @@ export default {
   .tryLangHeaderLabel {
     font-size: 32px;
     font-weight: 600;
+  }
+
+  .companies {
+    display: flex;
+    justify-content: center;
+    height: 500px;
+  }
+
+  .companiesColumn {
+    display: flex;
+    flex-direction: column;
+    margin: 0px 15px;
+    align-items: center;
+  }
+
+  .company {
+    margin: 50px 0px;
+    width: 75px;
+  }
+
+  .companiesUsingLang {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .companiesUsingLangHeader {
+    font-size: 28px;
+  }
+
+  .companiesUsingLangDesc {
+    font-size: 18px;
+  }
+
+  .aboutLang {
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(0, 150, 200);
+    border-top: 2px solid rgb(100, 150, 200)
+  }
+
+  .aboutLangItem {
+    width: 65%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .aboutLangItemHeader {
+    font-size: 36px;
+    color: rgb(255, 255, 255);
+  }
+
+  .benefits {
+    display: flex;
+    flex-direction: column;
+    margin: 25px 0px;
+  }
+
+  .benefit {
+    display: flex;
+  }
+
+  .benefitItem {
+    color: rgb(255, 255, 255);
+    margin: 0px 10px;
+  }
+
+  .btnsContainer {
+    display: flex;
+  }
+
+  .btnsContainerItem {
+    font-size: 24px;
+    width: 250px;
+    height: 75px;
+    margin: 0px 10px;
+  }
+
+  .btnsContainerTransparentItem {
+    background-color: transparent;
+    color: rgb(255, 255, 255);
+  }
+
+  .langLogo {
+    margin-top: 350px;
+  }
+
+  .aboutLangItemContent {
+    color: rgb(255, 255, 255);
+    margin: 10px 0px;
   }
 
 </style>
