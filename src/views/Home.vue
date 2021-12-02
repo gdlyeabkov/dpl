@@ -134,6 +134,7 @@ export default {
             let methodParams = sourceCodeLine.replace(/.*\(/, '').replace(/\)/, '').replaceAll(' ', '').split(',')
             if (methodName === 'print') {
               exitCode = sourceCodeLine.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
+              this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
             } else {
               // собственные функции
               let sourceStartStringIndex = this.sourceCode.split('\n').findIndex(source => source.includes(`void ${methodName}`))
@@ -144,14 +145,57 @@ export default {
                     let isExpression = source.match(/^.*\(.*\).*$/)
                     if (isExpression) {
                       alert(`methodParams: ${methodParams}`)
-                      exitCode = source.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
-                      let methodName = source.replace(/\(.*\)/, '').replaceAll(' ', '')
-                      if (methodName === 'print') {
+                      let isCompareParams = methodParams.length === this.sourceCode.split('\n')[sourceStartStringIndex].replace(/.*\(/, '').replace(/\).*/, '').split(',').length
+                      // alert(`methodParams.length: ${methodParams.length}; ${}`)
+                      if (!isCompareParams) {
+                        let exception = {
+                          class: 'ArgumentsCountException',
+                          line: {
+                            code: sourceCodeLine,
+                            index: sourceCodeLineIdx
+                          }
+                        }
+                        this.throwException(exception)
+                        return
+                      } else if (isCompareParams) {
                         exitCode = source.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
-                        // alert(source.replace(/.*\(/, '').replace(/\).*/, ''))
-                        // let methodParams = sourceCodeLine.replace(/.*\(/, '').replace(/\)/, '').replaceAll(' ', '').split(',')
+                        let methodName = source.replace(/\(.*\)/, '').replaceAll(' ', '')
+                        if (methodName === 'print') {
+                          let isContstant = (typeof source.replace(/.*print\(/, '').replace(/\).*/, '') === 'string' && source.replace(/.*print\(/, '').replace(/\).*/, '').includes('\'') || typeof source.replace(/.*print\(/, '').replace(/\).*/, '') === 'number' || typeof source.replace(/.*print\(/, '').replace(/\).*/, '') === 'boolean')
+                          let isLiteralDefined = this.sourceCode.split('\n')[sourceStartStringIndex].replace(/.*\(/, '').replace(/\).*/, '').split(',').includes(source.replace(/.*print\(/, '').replace(/\).*/, ''))
+                          if (isContstant) {
+                            exitCode = source.replace(/print\(\'/, '').replace(/\'.*\).*/, '')
+                            this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
+                          } else if (!isContstant && isLiteralDefined) {
+                            let outputMethodParams = methodParams.map(methodParam => {
+                              return methodParam.includes('') ? methodParam.replaceAll('\'', '') : methodParam
+                            })
+                            let argumentIndex = this.sourceCode.split('\n')[sourceStartStringIndex].replace(/.*\(/, '').replace(/\).*/, '').split(',').findIndex(argument => argument === source.replace(/.*print\(/, '').replace(/\).*/, ''))
+                            let needArguments = outputMethodParams.filter((methodParam, methodParamIndex) => methodParamIndex === argumentIndex)
+                            let isArgumentDefined = argumentIndex >= 0 && needArguments.length >= 1
+                            let needArgument = ''
+                            if (isArgumentDefined) {
+                              needArgument = needArguments[0]
+                            }
+                            alert(`Это переменная нужно брать параметр: ${needArgument}`)
+                            // exitCode = outputMethodParams
+                            exitCode = needArgument
+                            this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
+                          } else if (!isLiteralDefined) {
+                            let exception = {
+                              class: 'UndefinedLiteralException',
+                              line: {
+                                code: sourceCodeLine,
+                                index: sourceCodeLineIdx
+                              }
+                            }
+                            this.throwException(exception)
+                            return
+                          }
+                          // let methodParams = sourceCodeLine.replace(/.*\(/, '').replace(/\)/, '').replaceAll(' ', '').split(',')
+                        }
+                        // this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
                       }
-                      // this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
                     }
                   })
                 }
@@ -175,7 +219,9 @@ export default {
             // }
             
             // this.handlers[methodName]()
-            this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
+            
+            // раньше строка ниже была раскоментирована
+            // this.stdOut.push(`${sourceCodeLineIdx + 1}) ${exitCode}`)
           }
         } else {
           if (blocks === 0 && isClassMustHave) {
